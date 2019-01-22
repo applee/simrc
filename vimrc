@@ -21,6 +21,8 @@ set sidescrolloff=10
 set fillchars=
 set number
 set nowrap
+set showmatch
+set matchtime=2
 
 " 5 syntax, highlighting and spelling
 syntax on
@@ -35,7 +37,9 @@ set hidden
 " 7 multiple tab pages
 
 " 8 terminal
-set term=xterm-256color
+if !has('nvim')
+    set term=xterm-256color
+endif
 set ttyfast
 
 " 9 using the mouse
@@ -100,7 +104,9 @@ set ambiwidth=single
 
 " 25 various
 set loadplugins
-set viminfo='64,\"128,:64,%,n~/.viminfo
+if !has('nvim')
+    set viminfo='64,\"128,:64,%,n~/.viminfo
+endif
 
 " terms options
 set t_vb=
@@ -133,27 +139,90 @@ inoremap <C-e> <Esc><S-a>
 nnoremap <C-e> <Esc><S-a>
 cnoremap <C-e> <End>
 
-nnoremap <C-f> <Right>
-nnoremap <C-b> <Left>
 inoremap <C-f> <Right>
 inoremap <C-b> <Left>
 cnoremap <C-f> <Right>
 cnoremap <C-b> <Left>
 
-nnoremap <C-o> o
 inoremap <C-o> <Esc>o
-nnoremap <C-j> O
 inoremap <C-j> <Esc>O
 
 vnoremap > >gv
 vnoremap < <gv
 xnoremap p pgvy
 
+" 快速命令行模式
 nnoremap ; :!
 nnoremap H ^
 nnoremap L $
 nnoremap U <C-r>
+" 去掉搜索高亮
 nnoremap <Leader>/ :nohls<CR>
+
+" 关闭方向键, 强迫自己用 hjkl
+map <Left> <Nop>
+map <Right> <Nop>
+map <Up> <Nop>
+map <Down> <Nop>
+
+" kj 替换 Esc
+inoremap kj <Esc>
+
+" 切换前后buffer
+nnoremap [b :bprevious<cr>
+nnoremap ]b :bnext<cr>
+" 使用方向键切换buffer
+noremap <left> :bp<CR>
+noremap <right> :bn<CR>
+
+" 分屏窗口移动, Smart way to move between windows
+map <C-j> <C-W>j
+map <C-k> <C-W>k
+map <C-h> <C-W>h
+map <C-l> <C-W>l
+
+" F1 - F6 设置
+
+" F1 废弃这个键,防止调出系统帮助
+" I can type :help on my own, thanks.  Protect your fat fingers from the evils of <F1>
+noremap <F1> <Esc>"
+
+" F2 行号开关，用于鼠标复制代码用
+" 为方便复制，用<F2>开启/关闭行号显示:
+function! HideNumber()
+  if(&relativenumber == &number)
+    set relativenumber! number!
+  elseif(&number)
+    set number!
+  else
+    set relativenumber!
+  endif
+  set number?
+endfunc
+nnoremap <F2> :call HideNumber()<CR>
+" F3 显示可打印字符开关
+nnoremap <F3> :set list! list?<CR>
+" F4 换行开关
+nnoremap <F4> :set wrap! wrap?<CR>
+
+" F6 语法开关，关闭语法可以加快大文件的展示
+nnoremap <F6> :exec exists('syntax_on') ? 'syn off' : 'syn on'<CR>
+
+" when in insert mode, press <F5> to go to
+" paste mode, where you can paste mass data
+" that won't be autoindented
+set pastetoggle=<F5
+
+" disbale paste mode when leaving insert mode
+au InsertLeave * set nopaste
+
+
+"Treat long lines as break lines (useful when moving around in them)
+"se swap之后，同物理行上线直接跳
+nnoremap k gk
+nnoremap gk k
+nnoremap j gj
+nnoremap gj j
 
 function! BufferCount() abort
     return len(filter(range(1, bufnr('$')), 'buflisted(v:val)'))
@@ -172,6 +241,8 @@ endfunction
 nnoremap <Leader>tl :call LocationListWindonwToggle()<CR>
 nnoremap <Leader>jj :lnext<CR>
 nnoremap <Leader>kk :lpre<CR>
+
+nnoremap <Leader>s :call ToggleErrors()<cr>
 
 "-------------------------------------------------------------
 " Events
@@ -214,7 +285,14 @@ call plug#begin('~/.vim/bundle')
 
 " Efficiency
 Plug 'w0rp/ale'
-Plug 'Valloric/YouCompleteMe', {'dir': '~/.vim/bundle/YouCompleteMe', 'do': './install.py --clang-completer'}
+" Plug 'Valloric/YouCompleteMe', {'dir': '~/.vim/bundle/YouCompleteMe', 'do': './install.py --clang-completer'}
+if has('nvim')
+  Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+else
+  Plug 'Shougo/deoplete.nvim'
+  Plug 'roxma/nvim-yarp'
+  Plug 'roxma/vim-hug-neovim-rpc'
+endif
 Plug '/usr/local/opt/fzf' | Plug 'junegunn/fzf.vim'
 Plug 'scrooloose/nerdcommenter'
 Plug 'tpope/vim-repeat' | Plug 'tpope/vim-surround'
@@ -222,6 +300,7 @@ Plug 'easymotion/vim-easymotion'
 Plug 'Raimondi/delimitMate'
 Plug 'bronson/vim-trailing-whitespace'
 Plug 'majutsushi/tagbar'
+Plug 'ctrlpvim/ctrlp.vim' | Plug 'tacahiroy/ctrlp-funky'
 
 " Display
 Plug 'altercation/vim-colors-solarized'
@@ -232,7 +311,6 @@ Plug 'kien/rainbow_parentheses.vim'
 " Languages
 Plug 'fatih/vim-go', {'for': 'go', 'do': ':GoInstallBinaries'}
 Plug 'google/yapf', {'rtp': 'plugins/vim', 'for': 'python'}
-Plug 'udalov/kotlin-vim', {'for': 'kotlin'}
 Plug 'shiyanhui/vim-slash'
 
 call plug#end()
@@ -242,36 +320,25 @@ function! AleConfig()
     \   'go': ['gofmt', 'go build'],
     \   'c': ['clang'],
     \}
+    let g:ale_sign_error = '>>'
+    let g:ale_sign_warning = '>'
     let g:ale_lint_on_text_changed = 'never'
     let g:ale_lint_on_enter = 0
     let g:ale_c_clang_options = "std=c11 -Wno-everything"
     let g:ale_cpp_clang_options = "-std=c++14 -Wno-everything"
 
+    let g:ale_statusline_format = ['⨉ %d', '⚠ %d', '⬥ ok']
+    let g:ale_echo_msg_error_str = 'E'
+    let g:ale_echo_msg_warning_str = 'W'
+    let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
+
     nnoremap <Leader>ta :ALEToggle<CR>
 endfunction
 
-function! YouCompleteMeConfig()
-    let g:ycm_complete_in_comments = 1
-    let g:ycm_collect_identifiers_from_comments_and_strings = 1
-    let g:ycm_collect_identifiers_from_tags_files = 1
-    let g:ycm_add_preview_to_completeopt = 1
-    let g:ycm_autoclose_preview_window_after_completion = 1
-    let g:ycm_autoclose_preview_window_after_insertion = 1
-    let g:ycm_seed_identifiers_with_syntax = 1
-    let g:ycm_global_ycm_extra_conf = '~/.vim/bundle/YouCompleteMe/third_party/ycmd/.ycm_extra_conf.py'
-
-    let g:ycm_semantic_triggers =  {
-    \   'c' : ['->', '.'],
-    \   'objc' : ['->', '.'],
-    \   'cpp,objcpp' : ['->', '.', '::'],
-    \   'perl' : ['->'],
-    \   'php' : ['->', '::'],
-    \   'cs,java,javascript,d,vim,ruby,python,perl6,scala,vb,elixir,go' : ['.'],
-    \   'lua' : ['.', ':'],
-    \   'erlang' : [':'],
-    \ }
-
-    nnoremap <Leader>gd :YcmCompleter GoToDeclaration<CR>
+function! DeopleteConfig()
+    let g:deoplete#enable_at_startup = 1
+    " inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
+    " inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
 endfunction
 
 function! FzfConfig()
@@ -331,6 +398,38 @@ function! TagbarConfig()
     nnoremap <Leader>t :TagbarToggle<CR>
 endfunction
 
+function! CtrlpConfig()
+    let g:ctrlp_map = '<leader>p'
+    let g:ctrlp_cmd = 'CtrlP'
+    map <leader>f :CtrlPMRU<CR>
+    map <leader><space> :CtrlPBuffer<CR>
+    let g:ctrlp_custom_ignore = {
+        \ 'dir':  '\v[\/]\.(git|hg|svn|rvm)$',
+        \ 'file': '\v\.(exe|so|dll|zip|tar|tar.gz|pyc)$',
+        \ }
+    let g:ctrlp_working_path_mode=0
+    let g:ctrlp_match_window_bottom=1
+    let g:ctrlp_max_height=15
+    let g:ctrlp_match_window_reversed=0
+    let g:ctrlp_mruf_max=500
+    let g:ctrlp_follow_symlinks=1
+    " 如果安装了ag, 使用ag
+    if executable('ag')
+    " Use ag in CtrlP for listing files. Lightning fast and respects .gitignore
+    let g:ctrlp_user_command = 'ag %s -l --nocolor -g ""'
+    " ag is fast enough that CtrlP doesn't need to cache
+    let g:ctrlp_use_caching = 0
+    endif
+
+    " ctrlpfunky
+    " ctrlp插件1 - 不用ctag进行函数快速跳转
+    nnoremap <Leader>fu :CtrlPFunky<Cr>
+    " narrow the list down with a word under cursor
+    nnoremap <Leader>fU :execute 'CtrlPFunky ' . expand('<cword>')<Cr>
+    let g:ctrlp_funky_syntax_highlight = 1
+    let g:ctrlp_extensions = ['funky']
+endfunction
+
 function! SolarizedConfig()
     silent! colorscheme solarized
     let g:solarized_contrast = "normal"
@@ -348,7 +447,7 @@ function! AirlineConfig()
 endfunction
 
 function! NERDTreeConfig()
-    nnoremap <Leader><Tab> :NERDTreeToggle<CR>
+    nnoremap <Leader>n :NERDTreeToggle<CR>
     let g:NERDTreeIgnore = ['.pyc$']
     let g:NERDTreeCascadeSingleChildDir = 0
     let g:NERDTreeSortHiddenFirst = 1
@@ -398,19 +497,20 @@ function! VimGoConfig()
     let g:go_highlight_format_strings = 1
     let g:go_fmt_fail_silently = 1
     let g:go_fmt_command = "goimports"
-    let g:go_fmt_autosave = 0
+    let g:go_fmt_autosave = 1 
 
     filetype detect
 endfunction
 
 call AleConfig()
-call YouCompleteMeConfig()
+call DeopleteConfig()
 call FzfConfig()
 call NERDCommenterConfig()
 call EasyMotionConfig()
 call DelimitMateConfig()
 call TrailingWhiteSpaceConfig()
 call TagbarConfig()
+call CtrlpConfig()
 call SolarizedConfig()
 call AirlineConfig()
 call NERDTreeConfig()
