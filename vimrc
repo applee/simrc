@@ -12,6 +12,7 @@ set incsearch
 set magic
 set ignorecase
 set smartcase
+set whichwrap+=<,>,h,l
 
 " 3 tags
 
@@ -28,7 +29,7 @@ set matchtime=2
 syntax on
 set background=dark
 set hlsearch
-set nocursorline
+set cursorline
 
 " 6 multiple windows
 set laststatus=2
@@ -153,8 +154,8 @@ xnoremap p pgvy
 
 " 快速命令行模式
 nnoremap ; :!
-nnoremap H ^
-nnoremap L $
+noremap H ^
+noremap L $
 nnoremap U <C-r>
 " 去掉搜索高亮
 nnoremap <Leader>/ :nohls<CR>
@@ -337,8 +338,8 @@ endfunction
 
 function! DeopleteConfig()
     let g:deoplete#enable_at_startup = 1
-    " inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
-    " inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
+    inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
+    inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
 endfunction
 
 function! FzfConfig()
