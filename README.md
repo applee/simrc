@@ -5,7 +5,7 @@ A vim configuration kept simple and small.
 ## Installation
 
 ```shell
-curl -fLo ~/.vimrc https://raw.githubusercontent.com/shiyanhui/simrc/master/vimrc && vim
+curl -fLo ~/.vimrc https://raw.githubusercontent.com/applee/simrc/master/vimrc && vim
 ```
 
 ## Screenshots

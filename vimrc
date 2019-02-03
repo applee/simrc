@@ -286,14 +286,8 @@ call plug#begin('~/.vim/bundle')
 
 " Efficiency
 Plug 'w0rp/ale'
-" Plug 'Valloric/YouCompleteMe', {'dir': '~/.vim/bundle/YouCompleteMe', 'do': './install.py --clang-completer'}
-if has('nvim')
-  Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
-else
-  Plug 'Shougo/deoplete.nvim'
-  Plug 'roxma/nvim-yarp'
-  Plug 'roxma/vim-hug-neovim-rpc'
-endif
+Plug 'Valloric/YouCompleteMe', {'dir': '~/.vim/bundle/YouCompleteMe', 'do': './install.py --clang-completer --go-completer --rust-completer'}
+Plug 'zchee/deoplete-clang'
 Plug '/usr/local/opt/fzf' | Plug 'junegunn/fzf.vim'
 Plug 'scrooloose/nerdcommenter'
 Plug 'tpope/vim-repeat' | Plug 'tpope/vim-surround'
@@ -336,10 +330,20 @@ function! AleConfig()
     nnoremap <Leader>ta :ALEToggle<CR>
 endfunction
 
-function! DeopleteConfig()
-    let g:deoplete#enable_at_startup = 1
-    inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
-    inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
+function! YouCompleteMeConfig()
+    let g:ycm_complete_in_comments = 1
+    let g:ycm_collect_identifiers_from_comments_and_strings = 1
+    let g:ycm_collect_identifiers_from_tags_files = 1
+    let g:ycm_add_preview_to_completeopt = 1
+    let g:ycm_autoclose_preview_window_after_completion = 1
+    let g:ycm_autoclose_preview_window_after_insertion = 1
+    let g:ycm_seed_identifiers_with_syntax = 1
+    let g:ycm_max_diagnostics_to_display = 100
+    let g:ycm_max_num_candidates = 30
+    let g:ycm_confirm_extra_conf = 0 
+    let g:ycm_global_ycm_extra_conf = '~/.vim/bundle/YouCompleteMe/third_party/ycmd/.ycm_extra_conf.py'
+
+    nnoremap <Leader>gd :YcmCompleter GoToDeclaration<CR>
 endfunction
 
 function! FzfConfig()
@@ -504,7 +508,7 @@ function! VimGoConfig()
 endfunction
 
 call AleConfig()
-call DeopleteConfig()
+call YouCompleteMeConfig()
 call FzfConfig()
 call NERDCommenterConfig()
 call EasyMotionConfig()
