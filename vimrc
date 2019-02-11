@@ -30,6 +30,11 @@ syntax on
 set background=dark
 set hlsearch
 set cursorline
+if has("termguicolors")
+    set termguicolors
+    let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
+    let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
+endif
 
 " 6 multiple windows
 set laststatus=2
@@ -212,7 +217,7 @@ nnoremap <F6> :exec exists('syntax_on') ? 'syn off' : 'syn on'<CR>
 " when in insert mode, press <F5> to go to
 " paste mode, where you can paste mass data
 " that won't be autoindented
-set pastetoggle=<F5
+set pastetoggle=<F5>
 
 " disbale paste mode when leaving insert mode
 au InsertLeave * set nopaste
@@ -298,7 +303,7 @@ Plug 'majutsushi/tagbar'
 Plug 'ctrlpvim/ctrlp.vim' | Plug 'tacahiroy/ctrlp-funky'
 
 " Display
-Plug 'altercation/vim-colors-solarized'
+Plug 'lifepillar/vim-solarized8'
 Plug 'tpope/vim-fugitive' | Plug 'vim-airline/vim-airline' | Plug 'vim-airline/vim-airline-themes'
 Plug 'scrooloose/nerdtree' | Plug 'jistr/vim-nerdtree-tabs' | Plug 'Xuyuanp/nerdtree-git-plugin'
 Plug 'kien/rainbow_parentheses.vim'
@@ -334,16 +339,31 @@ function! YouCompleteMeConfig()
     let g:ycm_complete_in_comments = 1
     let g:ycm_collect_identifiers_from_comments_and_strings = 1
     let g:ycm_collect_identifiers_from_tags_files = 1
-    let g:ycm_add_preview_to_completeopt = 1
+    let g:ycm_add_preview_to_completeopt = 0
     let g:ycm_autoclose_preview_window_after_completion = 1
     let g:ycm_autoclose_preview_window_after_insertion = 1
     let g:ycm_seed_identifiers_with_syntax = 1
-    let g:ycm_max_diagnostics_to_display = 100
+    let g:ycm_show_diagnostics_ui = 0
     let g:ycm_max_num_candidates = 30
-    let g:ycm_confirm_extra_conf = 0 
+    let g:ycm_confirm_extra_conf = 0
     let g:ycm_global_ycm_extra_conf = '~/.vim/bundle/YouCompleteMe/third_party/ycmd/.ycm_extra_conf.py'
 
-    nnoremap <Leader>gd :YcmCompleter GoToDeclaration<CR>
+    let g:ycm_semantic_triggers =  {
+			\ 'c,cpp,python,java,go,erlang,perl': ['re!\w{2}'],
+			\ 'cs,lua,javascript': ['re!\w{2}'],
+			\ }
+    let g:ycm_filetype_whitelist = {
+			\ "c":1,
+			\ "cpp":1,
+            \ "cc":1,
+            \ "go":1,
+			\ "sh":1,
+			\ "zsh":1,
+			\ "rs":1,
+			\ }
+    nnoremap <Leader>gd :YcmCompleter GoToDefinition<CR>
+    nnoremap <Leader>jd :YcmCompleter GoToDeclaration<CR>
+    nnoremap <Leader>id :YcmCompleter GoToInclude<CR>
 endfunction
 
 function! FzfConfig()
@@ -436,9 +456,9 @@ function! CtrlpConfig()
 endfunction
 
 function! SolarizedConfig()
-    silent! colorscheme solarized
-    let g:solarized_contrast = "normal"
-    let g:solarized_visibility = "normal"
+    silent! colorscheme solarized8
+    let g:solarized_visibility = 'normal'
+    let g:solarized_diffmode = 'normal'
 
     highlight LineNr ctermbg=NONE guibg=NONE
     highlight SignColumn ctermbg=NONE guibg=NONE
