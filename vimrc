@@ -217,7 +217,7 @@ nnoremap <F6> :exec exists('syntax_on') ? 'syn off' : 'syn on'<CR>
 " when in insert mode, press <F5> to go to
 " paste mode, where you can paste mass data
 " that won't be autoindented
-set pastetoggle=<F5>
+set pastetoggle=<F7>
 
 " disbale paste mode when leaving insert mode
 au InsertLeave * set nopaste
@@ -311,7 +311,7 @@ Plug 'kien/rainbow_parentheses.vim'
 " Languages
 Plug 'fatih/vim-go', {'for': 'go', 'do': ':GoInstallBinaries'}
 Plug 'google/yapf', {'rtp': 'plugins/vim', 'for': 'python'}
-Plug 'shiyanhui/vim-slash'
+Plug 'Chiel92/vim-autoformat'
 
 call plug#end()
 
@@ -395,6 +395,7 @@ function! FzfConfig()
 endfunction
 
 function! NERDCommenterConfig()
+    let g:NERDTreeShowHidden=1
     let g:NERDSpaceDelims = 1
     let g:NERDTrimTrailingWhitespace = 1
     let g:NERDToggleCheckAllLines = 1
@@ -527,6 +528,13 @@ function! VimGoConfig()
     filetype detect
 endfunction
 
+function! AutoFormat()
+    let g:formatdef_custom_c='"clang-format -style=google"'
+    let g:formatters_c = ['custom_c']
+    let g:formatter_yapf_style = 'pep8'
+    noremap <F5> :Autoformat<CR>
+endfunction
+
 call AleConfig()
 call YouCompleteMeConfig()
 call FzfConfig()
@@ -541,3 +549,4 @@ call AirlineConfig()
 call NERDTreeConfig()
 call RainbowParenthesesConfig()
 call VimGoConfig()
+call AutoFormat()
