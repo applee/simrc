@@ -296,9 +296,8 @@ endif
 call plug#begin('~/.vim/bundle')
 
 " Efficiency
-Plug 'w0rp/ale'
+Plug 'dense-analysis/ale'
 Plug 'Valloric/YouCompleteMe', {'dir': '~/.vim/bundle/YouCompleteMe', 'do': './install.py --clang-completer --go-completer --rust-completer'}
-Plug 'zchee/deoplete-clang'
 Plug '/usr/local/opt/fzf' | Plug 'junegunn/fzf.vim'
 Plug 'scrooloose/nerdcommenter'
 Plug 'tpope/vim-repeat' | Plug 'tpope/vim-surround'
@@ -315,7 +314,6 @@ Plug 'scrooloose/nerdtree' | Plug 'jistr/vim-nerdtree-tabs' | Plug 'Xuyuanp/nerd
 Plug 'kien/rainbow_parentheses.vim'
 
 " Languages
-Plug 'fatih/vim-go', {'for': 'go', 'do': ':GoInstallBinaries'}
 Plug 'google/yapf', {'rtp': 'plugins/vim', 'for': 'python'}
 Plug 'Chiel92/vim-autoformat'
 
@@ -323,8 +321,9 @@ call plug#end()
 
 function! AleConfig()
     let g:ale_linters = {
-    \   'go': ['gofmt', 'go build'],
-    \   'c': ['clang'],
+    \   'go': ['gopls', 'gobuild'],
+    \   'c': ['gcc'],
+    \   'cpp': ['g++'],
     \}
     let g:ale_sign_error = '>>'
     let g:ale_sign_warning = '>'
@@ -367,7 +366,7 @@ function! YouCompleteMeConfig()
 			\ "zsh":1,
 			\ "rs":1,
 			\ }
-    nnoremap <Leader>gd :YcmCompleter GoToDefinition<CR>
+    nnoremap gd :YcmCompleter GoToDefinition<CR>
     nnoremap <Leader>jd :YcmCompleter GoToDeclaration<CR>
     nnoremap <Leader>id :YcmCompleter GoToInclude<CR>
 endfunction
@@ -516,24 +515,6 @@ function! RainbowParenthesesConfig()
     augroup END
 endfunction
 
-function! VimGoConfig()
-    let g:go_highlight_extra_types = 1
-    let g:go_highlight_operators = 1
-    let g:go_highlight_functions = 1
-    let g:go_highlight_function_arguments = 1
-    let g:go_highlight_function_calls = 1
-    let g:go_highlight_types = 1
-    let g:go_highlight_fields = 1
-    let g:go_highlight_build_constraints = 1
-    let g:go_highlight_generate_tags = 1
-    let g:go_highlight_format_strings = 1
-    let g:go_fmt_fail_silently = 1
-    let g:go_fmt_command = "goimports"
-    let g:go_fmt_autosave = 1 
-
-    filetype detect
-endfunction
-
 function! AutoFormat()
     let g:formatdef_custom_c='"clang-format -style=google"'
     let g:formatters_c = ['custom_c']
@@ -554,5 +535,4 @@ call SolarizedConfig()
 call AirlineConfig()
 call NERDTreeConfig()
 call RainbowParenthesesConfig()
-call VimGoConfig()
 call AutoFormat()
